@@ -1,39 +1,56 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import ToggleSwitchButton from './ToggleSwitchButton';
 import ToggleDarkModeButton from './ToggleDarkModeButton';
 import search from '../assets/images/search.png';
-import img1 from '../assets/images/breakfast.png';
-import img2 from '../assets/images/cake.png';
-import img3 from '../assets/images/drink.png';
-import img4 from '../assets/images/sandwich_bread_bikini_snack_food_icon_208027.png';
-import img5 from '../assets/images/main-dish.png';
-import img6 from '../assets/images/salad.png';
 import logo from '../assets/images/dinner.png';
 import { useTranslation } from 'react-i18next';
+import { fetchMealsByName, fetchMealCategories } from '../api/mealApi';
 
 const LandingPage = () => {
   const { t } = useTranslation();
   const [searchTerm, setSearchTerm] = useState('');
-  
-  const foodTypes = [
-    { id: 1, name: 'Breakfast', image: img1, description: 'A delicious breakfast dish.' },
-    { id: 2, name: 'Cake', image: img2, description: 'A variety of cakes to enjoy.' },
-    { id: 3, name: 'Drink', image: img3, description: 'Refreshing drinks for any occasion.' },
-    { id: 4, name: 'Sandwich', image: img4, description: 'Tasty sandwiches with various fillings.' },
-    { id: 5, name: 'Main Dish', image: img5, description: 'Hearty main dishes to satisfy your hunger.' },
-    { id: 6, name: 'Salad', image: img6, description: 'Healthy and fresh salads.' },
-  ];
+  const [meals, setMeals] = useState([]);
+  const [categories, setCategories] = useState([]);
+  const [loading, setLoading] = useState(true);
 
-  const filteredFoodTypes = foodTypes.filter(foodType => 
-    foodType.name.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  useEffect(() => {
+    const getCategories = async () => {
+      try {
+        const data = await fetchMealCategories();
+        setCategories(data);
+        setLoading(false);
+      } catch (error) {
+        console.error('Error fetching meal categories:', error);
+        setLoading(false);
+      }
+    };
+
+    getCategories();
+  }, []);
+
+  const handleSearch = async (e) => {
+    e.preventDefault();
+    setLoading(true);
+    try {
+      const data = await fetchMealsByName(searchTerm);
+      setMeals(data || []);
+      setLoading(false);
+    } catch (error) {
+      console.error('Error fetching meals:', error);
+      setLoading(false);
+    }
+  };
+
+  if (loading) {
+    return <p>Loading...</p>;
+  }
 
   return (
     <div className="flex flex-col items-center justify-center bg-white dark:bg-black min-h-screen">
       <div className='flex w-full'>
-        <div className='w-1/4 h-screen '>
-          <img src={logo} alt="Logo" className='w-2/4 h-1/4 mx-16'/>
+        <div className='w-1/4 h-screen flex justify-center items-center'>
+          <img src={logo} alt="Logo" className='w-1/2 h-1/4'/>
         </div>
         <div className='bg-yellow-400 w-3/4 rounded-full rounded-tr-none rounded-bl-none'>
           <div className='bg-yellow-400 w-full flex flex-col justify-center items-center h-screen rounded-tl-full ps-12 rounded-full relative'>
@@ -43,7 +60,7 @@ const LandingPage = () => {
             </div>
             <div className="flex flex-col items-center mb-10 justify-center">
               <h1 className="text-8xl text-center w-3/4 font-mono mb-4 text-black dark:text-white">{t('title')}</h1>
-              <label className='flex bg-white w-1/2 h-1/3 rounded-full border border-cyan-50'>
+              <form onSubmit={handleSearch} className='flex bg-white w-1/2 h-1/3 rounded-full border border-cyan-50'>
                 <span>
                   <img src={search} alt="Search" className='ml-20 w-20 h-full'/>
                 </span>
@@ -55,19 +72,24 @@ const LandingPage = () => {
                   value={searchTerm}
                   onChange={e => setSearchTerm(e.target.value)}
                 />
-              </label>
+              </form>
             </div>
           </div>
         </div>
       </div>
-      <div className="w-full h-screen bg-white dark:bg-black p-8 rounded-lg shadow-lg flex flex-col justify-center items-center border-spacing-8">
-        <h2 className="text-7xl font-extralight text-black dark:text-white mb-16">Types of Food</h2>
-        <div className="grid grid-cols-3 gap-20 w-3/4">
-          {filteredFoodTypes.map(foodType => (
-            <Link to={`/type/${foodType.id}`} key={foodType.id} className="flex flex-col items-center">
-              <img src={foodType.image} alt={foodType.name} className="w-3/4 h-3/4" />
-              <p className="text-black dark:text-white">{foodType.name}</p>
+      <div className="w-full h-full mt-36 bg-white dark:bg-black p-8 rounded-lg shadow-lg flex flex-col justify-center items-center border-spacing-8">
+        <h2 className="text-7xl font-serif text-red-800 shadow-rose-300  dark:text-white mb-16">Types of Food</h2>
+        <div className=" grid grid-cols-4  justify-center items-center w-4/4">
+          {meals.length > 0 ? meals.map(meal => (
+            <Link to={`/type/${meal.idMeal}`} key={meal.idMeal} className="flex flex-col items-center">
+              <img src={meal.strMealThumb} alt={meal.strMeal} className="w-3/4 h-3/4 border-4 border-black rounded-3xl" />
+              <p className="text-red-950 font-mono text-5xl dark:text-white">{meal.strMeal}</p>
             </Link>
+          )) : categories.map(category => (
+            <div key={category.idCategory} className="flex flex-col items-center">
+              <img src={category.strCategoryThumb} alt={category.strCategory} className="w-3/4 h-3/4 border-4 border-black rounded-3xl" />
+              <p className="text-red-950 font-mono text-5xl dark:text-white">{category.strCategory}</p>
+            </div>
           ))}
         </div>
       </div>

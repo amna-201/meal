@@ -1,33 +1,40 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
-import img1 from '../assets/images/breakfast.png';
-import img2 from '../assets/images/cake.png';
-import img3 from '../assets/images/drink.png';
-import img4 from '../assets/images/sandwich_bread_bikini_snack_food_icon_208027.png';
-import img5 from '../assets/images/main-dish.png';
-import img6 from '../assets/images/salad.png';
+import { fetchMealById } from '../api/mealApi';
 
 const FoodDetails = () => {
   const { id } = useParams();
-  const foodTypes = [
-    { id: 1, name: 'Breakfast', image: img1, description: 'A delicious breakfast dish.' },
-    { id: 2, name: 'Cake', image: img2, description: 'A variety of cakes to enjoy.' },
-    { id: 3, name: 'Drink', image: img3, description: 'Refreshing drinks for any occasion.' },
-    { id: 4, name: 'Sandwich', image: img4, description: 'Tasty sandwiches with various fillings.' },
-    { id: 5, name: 'Main Dish', image: img5, description: 'Hearty main dishes to satisfy your hunger.' },
-    { id: 6, name: 'Salad', image: img6, description: 'Healthy and fresh salads.' },
-  ];
-  const foodItem = foodTypes.find(item => item.id === parseInt(id));
+  const [meal, setMeal] = useState(null);
+  const [loading, setLoading] = useState(true);
 
-  if (!foodItem) {
-    return <p>Food type not found.</p>;
+  useEffect(() => {
+    const getMeal = async () => {
+      try {
+        const data = await fetchMealById(id);
+        setMeal(data);
+        setLoading(false);
+      } catch (error) {
+        console.error('Error fetching meal:', error);
+        setLoading(false);
+      }
+    };
+
+    getMeal();
+  }, [id]);
+
+  if (loading) {
+    return <p>Loading...</p>;
+  }
+
+  if (!meal) {
+    return <p>Meal not found.</p>;
   }
 
   return (
     <div className="flex flex-col items-center">
-      <img src={foodItem.image} alt={foodItem.name} className="w-1/4 h-1/4" />
-      <h2 className="text-4xl text-black dark:text-white mt-4">{foodItem.name}</h2>
-      <p className="text-lg text-black dark:text-white mt-2">{foodItem.description}</p>
+      <img src={meal.strMealThumb} alt={meal.strMeal} className="w-1/4 h-1/4 	 border-4	 border-black rounded-full" />
+      <h2 className="text-5xl text-yellow-500  font-mono dark:text-white mt-4  ">{meal.strMeal}</h2>
+      <p className="text-lg  text-red-900  w-3/4   font-black bg-red-50 dark:text-white mt-2">{meal.strInstructions}</p>
     </div>
   );
 };
