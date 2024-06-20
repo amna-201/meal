@@ -19,7 +19,7 @@ const ToggleDarkModeButton = () => {
   return (
     <div
       className={`relative inline-flex items-center h-8 w-20 rounded-full cursor-pointer transition-colors ${
-        isDarkMode ? 'bg-gray-700' : 'bg-gray-300'
+        isDarkMode ? 'bg-black' : 'bg-gray-300'
       }`}
       onClick={toggleDarkMode}
     >

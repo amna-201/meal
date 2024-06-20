@@ -43,7 +43,7 @@ const LandingPage = () => {
   };
 
   if (loading) {
-    return <p>Loading...</p>;
+    return <p>{t('loading')}</p>;
   }
 
   return (
@@ -66,7 +66,7 @@ const LandingPage = () => {
                 </span>
                 <input 
                   className="placeholder:italic placeholder:text-slate-400 block bg-white px-20 shadow-sm border-none sm:text-sm" 
-                  placeholder="Search ..." 
+                  placeholder={t('search_placeholder')}
                   type="text" 
                   name="search"
                   value={searchTerm}
@@ -78,7 +78,7 @@ const LandingPage = () => {
         </div>
       </div>
       <div className="w-full h-full mt-36 bg-white dark:bg-black p-8 rounded-lg shadow-lg flex flex-col justify-center items-center border-spacing-8">
-        <h2 className="text-7xl font-serif text-red-800 shadow-rose-300  dark:text-white mb-16">Types of Food</h2>
+        <h2 className="text-7xl font-serif text-red-800 shadow-rose-300  dark:text-white mb-16">{t('food_types')}</h2>
         <div className=" grid grid-cols-4  justify-center items-center w-4/4">
           {meals.length > 0 ? meals.map(meal => (
             <Link to={`/type/${meal.idMeal}`} key={meal.idMeal} className="flex flex-col items-center">
